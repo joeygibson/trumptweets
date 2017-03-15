@@ -1,0 +1,8 @@
+TweetIntent what'd he say now
+TweetIntent what did he say now
+TweetIntent what did he say
+TweetIntent what's his latest tweet
+TweetIntent what's Trump's latest tweet
+TweetIntent what did he tweet
+TweetIntent what'd he tweet
+TweetIntent slip me some skin
