@@ -1,9 +1,8 @@
 package com.joeygibson.trumptweets
 
-import java.util.HashSet
-
 import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler
-
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * This class could be the handler for an AWS Lambda function powering an Alexa Skills Kit
@@ -21,7 +20,9 @@ class TrumpTweetsSpeechletRequestStreamHandler : SpeechletRequestStreamHandler(T
          * This Id can be found on https://developer.amazon.com/edw/home.html#/ "Edit" the relevant
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
-            supportedApplicationIds.add("${APP_ID}")
+            val lines = Files.lines(Paths.get("API_KEY.txt"))
+
+            supportedApplicationIds.add(lines.toString().trim())
         }
     }
 }
