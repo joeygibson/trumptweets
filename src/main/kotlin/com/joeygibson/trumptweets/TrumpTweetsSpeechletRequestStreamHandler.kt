@@ -1,8 +1,7 @@
 package com.joeygibson.trumptweets
 
 import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler
-import java.nio.file.Files
-import java.nio.file.Paths
+import mu.KotlinLogging
 
 /**
  * This class could be the handler for an AWS Lambda function powering an Alexa Skills Kit
@@ -14,15 +13,18 @@ import java.nio.file.Paths
 class TrumpTweetsSpeechletRequestStreamHandler : SpeechletRequestStreamHandler(TrumpTweetsSpeechlet(), TrumpTweetsSpeechletRequestStreamHandler.supportedApplicationIds) {
     companion object {
         private val supportedApplicationIds = HashSet<String>()
+        private val log = KotlinLogging.logger {}
 
         init {
             /*
          * This Id can be found on https://developer.amazon.com/edw/home.html#/ "Edit" the relevant
          * Alexa Skill and put the relevant Application Ids in this Set.
          */
-            val lines = Files.lines(Paths.get("API_KEY.txt"))
+            val appId = System.getenv("APP_ID") ?: "NONE"
 
-            supportedApplicationIds.add(lines.toString().trim())
+            log.info { "APP_ID = ${appId}" }
+
+            supportedApplicationIds.add(appId)
         }
     }
 }
