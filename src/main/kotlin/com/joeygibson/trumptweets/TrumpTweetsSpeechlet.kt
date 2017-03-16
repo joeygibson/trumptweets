@@ -98,8 +98,17 @@ class TrumpTweetsSpeechlet : Speechlet {
             val fullUrl = "http://twitter.com${tweetUrl}"
 
             val tweetDoc = Jsoup.connect(fullUrl).get()
+            var tweetText = tweetDoc.select("p.tweet-text").first().ownText()
 
-            lastTweet = tweetDoc.text().take(100)
+            tweetText = tweetText
+                    .replace("""\S+://\S+""".toRegex(), "")
+                    .replace("""\s+""".toRegex(), " ")
+                    .replace("@", "")
+
+            val dateTime = tweetDoc.select("span.metadata").first()
+                    .child(0).ownText()
+
+            lastTweet = "$dateTime, $tweetText"
             lastTweetTime = now
         }
 
