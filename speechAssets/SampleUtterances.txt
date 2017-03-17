@@ -5,4 +5,5 @@ TweetIntent what's his latest tweet
 TweetIntent what's Trump's latest tweet
 TweetIntent what did he tweet
 TweetIntent what'd he tweet
+TweetIntent what now
 
