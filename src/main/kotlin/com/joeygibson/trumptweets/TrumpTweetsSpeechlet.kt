@@ -5,7 +5,10 @@ import com.amazon.speech.ui.PlainTextOutputSpeech
 import com.amazon.speech.ui.Reprompt
 import com.amazon.speech.ui.SimpleCard
 import mu.KotlinLogging
-import org.jsoup.Jsoup
+import twitter4j.Twitter
+import twitter4j.TwitterFactory
+import twitter4j.auth.OAuth2Token
+import twitter4j.conf.ConfigurationBuilder
 import java.lang.System.currentTimeMillis
 
 class TrumpTweetsSpeechlet : Speechlet {
@@ -14,6 +17,9 @@ class TrumpTweetsSpeechlet : Speechlet {
     val THRESHOLD = 900000L
     var lastTweet = ""
     var lastTweetTime = 0L
+
+    private var twitter: Twitter? = null
+    private var token: OAuth2Token? = null
 
     override fun onSessionStarted(request: SessionStartedRequest?, session: Session?) {
         log.info("onSessionStarted requestId=${request?.requestId}, sessionId=${session?.sessionId}")
@@ -68,6 +74,8 @@ class TrumpTweetsSpeechlet : Speechlet {
     override fun onLaunch(request: LaunchRequest?, session: Session?): SpeechletResponse {
         log.info("onLaunch requestId=${request?.requestId}, sessionId=${session?.sessionId}")
 
+        authenticateToTwitter()
+
         return getWelcomeResponse()
     }
 
@@ -91,27 +99,37 @@ class TrumpTweetsSpeechlet : Speechlet {
         val now = currentTimeMillis()
 
         if (now - lastTweetTime > THRESHOLD) {
-            val doc = Jsoup.connect("http://twitter.com/realdonaldtrump").get()
+            twitter?.let { twitter ->
+                val timeline = twitter.getUserTimeline("realdonaldtrump")
 
-            val tweet = doc.select("div.tweet").first()
-            val tweetUrl = tweet.attr("data-permalink-path")
-            val fullUrl = "http://twitter.com${tweetUrl}"
+                val tweet = timeline.first()
+                val tweetText = tweet.text
+                        .replace("""\S+://\S+""".toRegex(), "")
+                        .replace("""\s+""".toRegex(), " ")
+                        .replace("@", "")
 
-            val tweetDoc = Jsoup.connect(fullUrl).get()
-            var tweetText = tweetDoc.select("p.tweet-text").first().ownText()
-
-            tweetText = tweetText
-                    .replace("""\S+://\S+""".toRegex(), "")
-                    .replace("""\s+""".toRegex(), " ")
-                    .replace("@", "")
-
-            val dateTime = tweetDoc.select("span.metadata").first()
-                    .child(0).ownText()
-
-            lastTweet = "$dateTime, $tweetText"
-            lastTweetTime = now
+                lastTweet = "${tweet.createdAt}, $tweetText"
+                lastTweetTime = now
+            }
         }
 
         return lastTweet
+    }
+
+    fun authenticateToTwitter() {
+        if (twitter != null && token != null) {
+            return
+        }
+
+        val cb = ConfigurationBuilder()
+        cb.setApplicationOnlyAuthEnabled(true)
+
+        twitter = TwitterFactory(cb.build()).instance
+        twitter?.let {
+            it.setOAuthConsumer(System.getenv("CONSUMER_KEY"),
+                    System.getenv("CONSUMER_SECRET_KEY"))
+
+            token = it.oAuth2Token
+        }
     }
 }
