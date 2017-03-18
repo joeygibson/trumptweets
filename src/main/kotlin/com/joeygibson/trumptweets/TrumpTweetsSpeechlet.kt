@@ -10,6 +10,7 @@ import twitter4j.TwitterFactory
 import twitter4j.auth.OAuth2Token
 import twitter4j.conf.ConfigurationBuilder
 import java.lang.System.currentTimeMillis
+import java.text.SimpleDateFormat
 
 class TrumpTweetsSpeechlet : Speechlet {
     val log = KotlinLogging.logger {}
@@ -109,7 +110,10 @@ class TrumpTweetsSpeechlet : Speechlet {
                         .replace("""\s+""".toRegex(), " ")
                         .replace("@", "")
 
-                lastTweet = "${tweet.createdAt}, $tweetText"
+                val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy, 'at' h:mm a")
+                val createdAt = dateFormat.format(tweet.createdAt)
+
+                lastTweet = "On $createdAt, he tweeted, $tweetText"
                 lastTweetTime = now
             }
         }
