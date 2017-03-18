@@ -96,6 +96,7 @@ class TrumpTweetsSpeechlet : Speechlet {
     }
 
     fun getTrumpsLatestTweet(): String {
+        authenticateToTwitter()
         val now = currentTimeMillis()
 
         if (now - lastTweetTime > THRESHOLD) {
