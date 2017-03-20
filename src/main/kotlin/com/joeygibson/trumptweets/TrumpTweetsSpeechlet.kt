@@ -16,8 +16,8 @@ class TrumpTweetsSpeechlet : Speechlet {
     val log = KotlinLogging.logger {}
 
     val THRESHOLD = 900000L
-    var lastTweet = ""
-    var lastTweetTime = 0L
+    var latestTweets = emptyList<String>()
+    var lastCheckTime = 0L
 
     private var twitter: Twitter? = null
     private var token: OAuth2Token? = null
@@ -60,7 +60,7 @@ class TrumpTweetsSpeechlet : Speechlet {
     }
 
     private fun getTweetResponse(): SpeechletResponse {
-        val speechText = getTrumpsLatestTweet()
+        val speechText = getTrumpsLatestTweets()
 
         val card = SimpleCard()
         card.title = "TrumpTweets"
@@ -96,29 +96,33 @@ class TrumpTweetsSpeechlet : Speechlet {
         return SpeechletResponse.newAskResponse(speech, reprompt, card)
     }
 
-    fun getTrumpsLatestTweet(): String {
+    fun getTrumpsLatestTweets(): String {
         authenticateToTwitter()
         val now = currentTimeMillis()
 
-        if (now - lastTweetTime > THRESHOLD) {
+        if (now - lastCheckTime > THRESHOLD) {
             twitter?.let { twitter ->
                 val timeline = twitter.getUserTimeline("realdonaldtrump")
 
-                val tweet = timeline.first()
-                val tweetText = tweet.text
-                        .replace("""\S+://\S+""".toRegex(), "")
-                        .replace("""\s+""".toRegex(), " ")
-                        .replace("@", "")
+                val rawTweets = timeline.take(5)
 
-                val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy, 'at' h:mm a")
-                val createdAt = dateFormat.format(tweet.createdAt)
+                latestTweets = rawTweets.map { tweet ->
+                    val tweetText = tweet.text
+                            .replace("""\S+://\S+""".toRegex(), "")
+                            .replace("""\s+""".toRegex(), " ")
+                            .replace("@", "")
 
-                lastTweet = "On $createdAt, he tweeted, $tweetText"
-                lastTweetTime = now
+                    val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy, 'at' h:mm a")
+                    val createdAt = dateFormat.format(tweet.createdAt)
+
+                    "On $createdAt, he tweeted, $tweetText"
+                }
+
+                lastCheckTime = now
             }
         }
 
-        return lastTweet
+        return latestTweets.joinToString("\n")
     }
 
     fun authenticateToTwitter() {
