@@ -1,0 +1,3 @@
+Change welcome message to explain what the skill does, and possible invocations.
+The set reprompt to "What would you like to do?"
+
