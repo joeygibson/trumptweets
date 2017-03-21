@@ -20,6 +20,13 @@ the "Application Id" that is on the "Skill Information" tab, and go back to the 
 "Code" tab, add an environment variable called `APP_ID`, and set its value to the application Id
 you got from the skill page.
 
+You will also need to set two additional environment variables to enable the Twitter integration. They are
+
+* CONSUMER_KEY
+* CONSUMER_SECRET_KEY
+
+The values for these can be found by logging in to [the Twitter apps page](https://apps.twitter.com).
+
 Save it and test.
 
 
