@@ -88,10 +88,10 @@ class TrumpTweetsSpeechlet : Speechlet {
         val now = currentTimeMillis()
 
         if (now - lastCheckTime > THRESHOLD) {
-
             twitter?.let { twitter ->
-                val timeline = twitter.getUserTimeline("realdonaldtrump")
+                val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy, 'at' h:mm a")
 
+                val timeline = twitter.getUserTimeline("realdonaldtrump")
                 val rawTweets = timeline.take(5)
 
                 latestTweets = rawTweets.map { tweet ->
@@ -100,7 +100,6 @@ class TrumpTweetsSpeechlet : Speechlet {
                             .replace("""\s+""".toRegex(), " ")
                             .replace("@", "")
 
-                    val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy, 'at' h:mm a")
                     val createdAt = dateFormat.format(tweet.createdAt)
 
                     "On $createdAt, he tweeted, $tweetText"
