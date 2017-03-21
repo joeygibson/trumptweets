@@ -44,7 +44,7 @@ class TrumpTweetsSpeechlet : Speechlet {
     }
 
     private fun getHelpResponse(): SpeechletResponse {
-        val speechText = "You can ask what did he say now?"
+        val speechText = "The Trump Tweets skill reads the last five tweets from RealDonaldTrump. You can simply launch the skill, or ask questions like 'what did he say now?'."
 
         val card = SimpleCard()
         card.title = "TrumpTweets"
@@ -53,8 +53,11 @@ class TrumpTweetsSpeechlet : Speechlet {
         val speech = PlainTextOutputSpeech()
         speech.text = speechText
 
+        val repromptSpeech = PlainTextOutputSpeech()
+        repromptSpeech.text = "Would you like to hear his latest tweets?"
+
         val reprompt = Reprompt()
-        reprompt.outputSpeech = speech
+        reprompt.outputSpeech = repromptSpeech
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card)
     }
@@ -75,32 +78,17 @@ class TrumpTweetsSpeechlet : Speechlet {
     override fun onLaunch(request: LaunchRequest?, session: Session?): SpeechletResponse {
         log.info("onLaunch requestId=${request?.requestId}, sessionId=${session?.sessionId}")
 
-        authenticateToTwitter()
-
         return getWelcomeResponse()
     }
 
-    private fun getWelcomeResponse(): SpeechletResponse {
-        val speechText = "Hear Trump's latest absurd tweet."
-
-        val card = SimpleCard()
-        card.title = "TrumpTweets"
-        card.content = speechText
-
-        val speech = PlainTextOutputSpeech()
-        speech.text = speechText
-
-        val reprompt = Reprompt()
-        reprompt.outputSpeech = speech
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card)
-    }
+    private fun getWelcomeResponse() = getTweetResponse()
 
     fun getTrumpsLatestTweets(): String {
         authenticateToTwitter()
         val now = currentTimeMillis()
 
         if (now - lastCheckTime > THRESHOLD) {
+
             twitter?.let { twitter ->
                 val timeline = twitter.getUserTimeline("realdonaldtrump")
 
